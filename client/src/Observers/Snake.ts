@@ -63,10 +63,10 @@ export default class Snake extends Observer {
     const head = material.getSnakeHead(theme);
     this._head = head;
 
-    this.head = material.makeCanvas(80, 80);
+    this.head = material.makeCanvas(30, 30);
     this.headContext = this.head.getContext('2d');
-    this.headContext.translate(40, 40);
-    this.headContext.drawImage(head, -40, -40);
+    this.headContext.translate(15, 15);
+    this.headContext.drawImage(head, -15, -15);
 
     this.section = material.getSnakeSection(theme);
 
@@ -97,9 +97,9 @@ export default class Snake extends Observer {
   private rotateHead() {
     const { angle } = this.getStates();
     this.headContext.save();
-    this.headContext.clearRect(-45, -45, 95, 95);
+    this.headContext.clearRect(-20, -20, 40, 40);
     this.headContext.rotate(angle * RADIAN);
-    this.headContext.drawImage(this._head, -40, -40);
+    this.headContext.drawImage(this._head, -15, -15);
     this.headContext.restore();
   }
 
@@ -165,13 +165,10 @@ export default class Snake extends Observer {
     }
 
     this.clearSections();
-    offscreenContext.clearRect(hx - mapX - 10, hy - mapY - 10, hsize + 20, hsize + 20);
+    context.clearRect(hx - mapX - 5, hy - mapY - 5, hsize + 10, hsize + 10);
 
     this.renderSections();
-    offscreenContext.drawImage(this.head, 0, 0, 80, 80, x - mapX, y - mapY, size, size);
-
-    context.clearRect(0, 0, width, height);
-    context.drawImage(this.offCanvas,0, 0);
+    context.drawImage(this.head, x - mapX, y - mapY);
   }
 
   /**
@@ -179,10 +176,10 @@ export default class Snake extends Observer {
    */
   private clearSections(): void {
     const { size: hsize } = this.getHistory();
-    const { offscreenContext } = this;
+    const { context } = this;
 
     for (const section of this.sections) {
-      offscreenContext.clearRect(section.lastX - 10, section.lastY - 10, hsize + 20, hsize + 20);
+      context.clearRect(section.lastX - 5, section.lastY - 5, hsize + 10, hsize + 10);
     }
   }
 
@@ -191,7 +188,7 @@ export default class Snake extends Observer {
    */
   private renderSections(): void {
     const { size, mapX, mapY } = this.getStates();
-    const { offscreenContext } = this;
+    const { context } = this;
 
     const reverseStore: Array<any> = [];
     for (const section of this.sections) {
@@ -215,7 +212,7 @@ export default class Snake extends Observer {
     }
 
     for (const [x, y] of reverseStore) {
-      offscreenContext.drawImage(this.section, 0,0, 80, 80, x - mapX, y - mapY, size, size);
+      context.drawImage(this.section, x - mapX, y - mapY);
     }
   }
 

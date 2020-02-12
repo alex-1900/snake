@@ -8,15 +8,16 @@ export default class Material {
   private snakeSections: {[key: number]: HTMLCanvasElement} = {};
 
   constructor() {
-    this.snakeHeads[SnakeType.Red] = this.snakeHeadToCanvas('#B22222', 80);
-    this.snakeHeads[SnakeType.Yellow] = this.snakeHeadToCanvas('#FFD700', 80);
-    this.snakeHeads[SnakeType.Blue] = this.snakeHeadToCanvas('#4682B4', 80);
-    this.snakeHeads[SnakeType.Cyan] = this.snakeHeadToCanvas('#00CED1', 80);
+    const size = 30;
+    this.snakeHeads[SnakeType.Red] = this.snakeHeadToCanvas('#B22222', size);
+    this.snakeHeads[SnakeType.Yellow] = this.snakeHeadToCanvas('#FFD700', size);
+    this.snakeHeads[SnakeType.Blue] = this.snakeHeadToCanvas('#4682B4', size);
+    this.snakeHeads[SnakeType.Cyan] = this.snakeHeadToCanvas('#00CED1', size);
 
-    this.snakeSections[SnakeType.Red] = this.snakeSectionToCanvas('#B22222', '#8B0000', 80);
-    this.snakeSections[SnakeType.Yellow] = this.snakeSectionToCanvas('#FFD700', '#DAA520', 80);
-    this.snakeSections[SnakeType.Blue] = this.snakeSectionToCanvas('#4682B4', '#000080', 80);
-    this.snakeSections[SnakeType.Cyan] = this.snakeSectionToCanvas('#00CED1', '#20B2AA', 80);
+    this.snakeSections[SnakeType.Red] = this.snakeSectionToCanvas('#B22222', '#8B0000', size);
+    this.snakeSections[SnakeType.Yellow] = this.snakeSectionToCanvas('#FFD700', '#DAA520', size);
+    this.snakeSections[SnakeType.Blue] = this.snakeSectionToCanvas('#4682B4', '#000080', size);
+    this.snakeSections[SnakeType.Cyan] = this.snakeSectionToCanvas('#00CED1', '#20B2AA', size);
   }
 
   /**
