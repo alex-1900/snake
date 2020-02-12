@@ -1,0 +1,126 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+.overflow-hidden {
+    overflow-x: hidden;
+    overflow-y: hidden;
+}
+
+.float-left {
+    float: left;
+}
+.float-right {
+    float: right;
+}
+
+.select-none {
+    user-select: none;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+}
+
+.position-bottom {
+    position: absolute;
+    left: 0;
+    bottom: 0;
+}
+
+/* 重合 */
+.coincide {
+    position: absolute;
+    top: 0;
+    left: 0;
+}
+
+body {
+    width : 100vw;
+    height : 100vh;
+
+    .text-center {
+        text-align: center;
+    }
+
+    .landscape {
+        width : 100vw;
+        height : 100vh;
+    }
+
+    .controller {
+        width: 100vmax;
+        height: 40vmin;
+    }
+
+    .rocker-wrapper {
+        width: 100px;
+        height: 100px;
+        margin-left: 2rem;
+        border-radius: 100%;
+        background: rgba(153, 153, 153, 0.4);
+
+        .rocker {
+            position: relative;
+            top:25px;
+            left: 25px;
+            width: 50px;
+            height: 50px;
+            border-radius: 100%;
+            background: rgb(153, 153, 153);
+        }
+    }
+
+    .speed-up-wrap {
+        width: 100px;
+        height: 100px;
+        margin-right: 2rem;
+
+        .speed-up {
+            position: relative;
+            top:25px;
+            left: 25px;
+            width: 70px;
+            height: 70px;
+            border-radius: 100%;
+            background: rgba(240, 107, 107, .7);
+        }
+    }
+
+    .welcome {
+        color: #666;
+        h1 {
+            padding: 2rem;
+        }
+        button.start-game {
+            position: relative;
+            top: 0;
+            left: 50%;
+            margin-left: -50px;
+            margin-top: 3rem;
+            width: 100px;
+            height: 40px;
+            border: 1px dashed #888;
+            color: #555;
+        }
+        .version-text {
+            font-size: .8rem;
+            padding: .3rem;
+        }
+    }
+
+    @media screen and (orientation: portrait) {
+        .landscape {
+            width : 100vmax;
+            height : 100vmin;
+            transform-origin: top left;
+            transform: rotate(90deg) translate(0,-100vmin);
+        }
+    
+        .turn {
+            transform-origin: top left;
+            transform: rotate(90deg) translate(0,-100vmin);
+        }
+    }
+}

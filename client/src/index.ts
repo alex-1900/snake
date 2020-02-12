@@ -1,0 +1,45 @@
+import '../style.scss';
+import container from "./dependents";
+import ActionInterface from "./Interfaces/ActionInterface";
+import SubjectInterface from './Interfaces/SubjectInterface';
+import Snake from './Observers/Snake';
+import Control from './Components/Contro';
+import PublicMap from './Observers/PublicMap';
+import Food from './Observers/Food';
+
+const elementRocker = document.getElementById('rocker');
+const elementSpeedUp = document.getElementById('speed-up');
+const elementStartGame = document.getElementById('start-game');
+const elementWelcome = document.getElementById('welcome');
+
+const elementGameOverCfm = document.getElementById('game-over-confirm');
+const elementGameover = document.getElementById('gameover');
+
+const action = container.get<ActionInterface>('action');
+const subject = container.get<SubjectInterface>('subject');
+
+action.onStop(function() {
+  elementGameover.style.display = 'block';
+});
+
+elementStartGame.onclick = function(event) {
+  elementWelcome.style.display = 'none';
+
+  const food = new Food();
+  subject.register(food);
+
+  const publicMap = new PublicMap(food);
+  subject.register(publicMap);
+
+  const snake = new Snake(publicMap, food);
+  subject.register(snake);
+
+  const controller = new Control(elementRocker, elementSpeedUp, snake);
+
+  action.start();
+};
+
+elementGameOverCfm.onclick = function(event) {
+  elementGameover.style.display = 'none';
+  elementWelcome.style.display = 'block';
+};
