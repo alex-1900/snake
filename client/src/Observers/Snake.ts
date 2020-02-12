@@ -44,8 +44,6 @@ export default class Snake extends Observer {
 
   private positions: Array<any> = [];
 
-  static WAIT_TIME = 18;
-
   public constructor(
     private publicMap: PublicMap,
     private food: Food
@@ -77,6 +75,7 @@ export default class Snake extends Observer {
       x: 500,
       y: 600,
       size: 30,
+      waitTime: 18,
       speed: 2,
       angle: 0,
       toAngle: 0,
@@ -87,12 +86,12 @@ export default class Snake extends Observer {
       scores: 0,
     });
 
-    this.addSection();
-    this.addSection();
-    this.addSection();
-    this.addSection();
-    this.addSection();
-    this.addSection();
+    {
+      let i = 6;
+      while (i--) {
+        this.addSection();
+      }
+    }
   }
 
   private rotateHead() {
@@ -111,24 +110,27 @@ export default class Snake extends Observer {
    */
   public update(timestamp: number): void {
     // if (this.isOvertime(timestamp, 32)) {
-      const { x, y, speed, angle, toAngle, sectionEnd, size, scores, interfaceSize: [width, height] } = this.getStates();
+      const { x, y, speed, angle, toAngle, size, waitTime, scores, interfaceSize: [width, height] } = this.getStates();
       if (angle !== toAngle) {
         this.eachAngle();
         this.rotateHead();
       }
+
       let states: {[key: string]: any} = {};
       const nextX = speed * Math.cos(angle * RADIAN) + x;
       const nextY = speed * Math.sin(angle * RADIAN) + y;
-      const mapX = nextX - width / 2 + size / 2;
-      const mapY = nextY - height / 2 + size / 2;
+      this.positions.push([nextX, nextY]);
+
+      const fixR = size / 2;
+      const mapX = nextX - width / 2 + fixR;
+      const mapY = nextY - height / 2 + fixR;
       this.publicMap.updateMaxPosition(mapX, mapY);
       states = {
         x: nextX,
         y: nextY,
         mapX,
-        mapY
+        mapY,
       };
-      this.positions.push([nextX, nextY]);
 
       const maxPos = PublicMap.mapSize - size;
       if (nextX <= 0 || nextY <= 0 || nextX >= maxPos || nextY >= maxPos) {
@@ -188,7 +190,7 @@ export default class Snake extends Observer {
    * 渲染蛇身
    */
   private renderSections(): void {
-    const { size, mapX, mapY, sectionEnd } = this.getStates();
+    const { size, mapX, mapY } = this.getStates();
     const { offscreenContext } = this;
 
     const reverseStore: Array<any> = [];
@@ -221,8 +223,8 @@ export default class Snake extends Observer {
    * 添加一截蛇身
    */
   private addSection() {
-    const { x, y, speed } = this.getStates();
-    const waitTime = Snake.WAIT_TIME / speed;
+    const { x, y, speed, waitTime } = this.getStates();
+    const newWaitTime = waitTime / speed;
     const lastSection = this.sections[this.sections.length - 1];
     let lastX = x;
     let lastY = y;
@@ -235,7 +237,7 @@ export default class Snake extends Observer {
       isLast: true,
       lastX,
       lastY,
-      waitTime,
+      waitTime: newWaitTime,
       position: 0
     });
     this.setStates({sectionEnd: false});
@@ -252,20 +254,11 @@ export default class Snake extends Observer {
     const { angle, toAngle, speed } = this.getStates();
     let nextAngle = angle;
     const accelerate = speed * 2.8;
-    if (Math.abs(toAngle - angle) <= 180) {
-      if (toAngle - angle > 0) {
-        nextAngle += accelerate;
-      }
-      if (toAngle - angle < 0) {
-        nextAngle -= accelerate;
-      }
-    } else if (Math.abs(toAngle - angle) > 180) {
-      if (toAngle - angle > 0) {
-        nextAngle -= accelerate;
-      }
-      if (toAngle - angle < 0) {
-        nextAngle += accelerate;
-      }
+    const step = toAngle - angle;
+    if (Math.abs(toAngle - angle) <= 180 && step !== 0) {
+      nextAngle += step > 0 ? accelerate : -accelerate;
+    } else if (Math.abs(toAngle - angle) > 180 && step !== 0) {
+      nextAngle += step > 0 ? -accelerate : accelerate;
     }
     if (angle > 360) {
       nextAngle -= 360

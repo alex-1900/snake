@@ -17,7 +17,8 @@ const foodColors: Array<string> = [
   '#98FB98',
   '#ADD8E6',
   '#40E0D0',
-  '#FFC0CB'
+  '#FFC0CB',
+  '#DDA0DD'
 ];
 
 const TREE_SIZE = 100;
