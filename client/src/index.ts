@@ -43,3 +43,5 @@ elementGameOverCfm.onclick = function(event) {
   elementGameover.style.display = 'none';
   elementWelcome.style.display = 'block';
 };
+
+elementStartGame.style.display = 'block';
