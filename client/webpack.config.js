@@ -13,7 +13,7 @@ module.exports = {
     path: DIST_PATH,
     filename: OUTPUT_FILE
   },
-  devtool: 'inline-source-map',
+  // devtool: 'inline-source-map',
   devServer: {
     contentBase: DIST_PATH,
     compress: true,
