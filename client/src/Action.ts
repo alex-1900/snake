@@ -3,7 +3,7 @@ import SubjectInterface from './Interfaces/SubjectInterface';
 
 export default class Action implements ActionInterface {
 
-  private isRunning: Boolean = false;
+  public isRunning: boolean = false;
 
   private animationFrameId: number = 0;
 

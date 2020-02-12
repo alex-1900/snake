@@ -38,7 +38,7 @@ export default class Snake extends Observer {
 
   private positions: Array<any> = [];
 
-  static WAIT_TIME = 20;
+  static WAIT_TIME = 18;
 
   public constructor(
     private publicMap: PublicMap,
@@ -102,7 +102,7 @@ export default class Snake extends Observer {
    * @param timestamp 时间戳
    */
   public update(timestamp: number): void {
-    if (this.isOvertime(timestamp, 16)) {
+    // if (this.isOvertime(timestamp, 32)) {
       const { x, y, speed, angle, toAngle, sectionEnd, size, scores, interfaceSize: [width, height] } = this.getStates();
       if (angle !== toAngle) {
         this.eachAngle();
@@ -139,7 +139,7 @@ export default class Snake extends Observer {
         }
       }
       this.setStates(states);
-    }
+    // }
   }
 
   /**

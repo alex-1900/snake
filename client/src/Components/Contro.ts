@@ -1,5 +1,6 @@
 import container from "../dependents";
 import Snake from "../Observers/Snake";
+import ActionInterface from "../Interfaces/ActionInterface";
 
 export default class Control {
 
@@ -7,6 +8,8 @@ export default class Control {
   private left: number = 25;
   private startX: number = 0;
   private startY: number = 0;
+
+  private action: ActionInterface;
 
   public constructor(
     private elementRocker: HTMLElement,
@@ -19,16 +22,21 @@ export default class Control {
     
     elementSpeedUp.ontouchstart = this.speedUpStart.bind(this);
     elementSpeedUp.ontouchend = this.speedUpEnd.bind(this);
+    this.action = container.get<ActionInterface>('action');
   }
 
   speedUpStart(event: TouchEvent) {
     event.preventDefault();
-    this.snake.setStates({speed: 3});
+    if (this.action.isRunning) {
+      this.action.pause();
+    } else {
+      this.action.start();
+    }
   }
 
   speedUpEnd(event: TouchEvent) {
     event.preventDefault();
-    this.snake.setStates({speed: 2});
+    // this.snake.setStates({speed: 2});
   }
 
   /**

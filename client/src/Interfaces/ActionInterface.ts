@@ -2,6 +2,8 @@
  * 用于控制动画的刷新功能
  */
 export default interface ActionInterface {
+
+  isRunning: boolean;
   /**
    * 开始运行动画，如果当前没有启动过，则启动动画帧运动
    * 如果当前动画正在运行，则不改变当前状态
