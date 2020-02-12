@@ -10,6 +10,12 @@ import PublicMap from './PublicMap';
 import ActionInterface from '../Interfaces/ActionInterface';
 import Food from './Food';
 
+function makeRandom(min: number, max: number) {
+  const range = max - min;   
+  const rand = Math.random();   
+  return(min + Math.round(rand * range));  
+}
+
 /**
  * 蛇对象，控制蛇的动作与渲染
  */
@@ -49,20 +55,22 @@ export default class Snake extends Observer {
     this.offCanvas = this.offLayer.push(true);
     this.offscreenContext = this.offCanvas.getContext('2d');
 
+    const theme = makeRandom(SnakeType.Yellow, SnakeType.Cyan);
+
     this.layer = container.get<Layer>('Layer');
     this.canvas = this.layer.push();
     const graphical = container.make<Graphical>('Graphical', this.canvas);
     const material = container.get<Material>('Material');
     this.context = graphical.getContext();
-    const head = material.getSnakeHead(SnakeType.Yellow);
+    const head = material.getSnakeHead(theme);
     this._head = head;
-    
+
     this.head = material.makeCanvas(80, 80);
     this.headContext = this.head.getContext('2d');
     this.headContext.translate(40, 40);
     this.headContext.drawImage(head, -40, -40);
 
-    this.section = material.getSnakeSection(SnakeType.Yellow);
+    this.section = material.getSnakeSection(theme);
 
     this.setStates({
       interfaceSize: container.get('interfaceSize'),
@@ -243,16 +251,15 @@ export default class Snake extends Observer {
   private eachAngle() {
     const { angle, toAngle, speed } = this.getStates();
     let nextAngle = angle;
-    const accelerate = speed * 3;
-    if (Math.abs(toAngle - angle) < 180) {
+    const accelerate = speed * 2.8;
+    if (Math.abs(toAngle - angle) <= 180) {
       if (toAngle - angle > 0) {
         nextAngle += accelerate;
       }
       if (toAngle - angle < 0) {
         nextAngle -= accelerate;
       }
-    }
-    if (Math.abs(toAngle - angle) > 180) {
+    } else if (Math.abs(toAngle - angle) > 180) {
       if (toAngle - angle > 0) {
         nextAngle -= accelerate;
       }
@@ -263,7 +270,7 @@ export default class Snake extends Observer {
     if (angle > 360) {
       nextAngle -= 360
     }
-    if (angle < 0) {
+    if (angle <= 0) {
       nextAngle += 360
     }
     if (Math.abs(toAngle - angle) < accelerate) {
