@@ -38,10 +38,6 @@ export default class PublicMap extends Observer {
     });
   }
 
-  public update(timestamp: number): void {
-    // pass
-  }
-
   public render() {
     const [ width, height ] = this.interfaceSize;
     const { x, y } = this.getStates();

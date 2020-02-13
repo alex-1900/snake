@@ -1,6 +1,7 @@
 import container from "../dependents";
 import Snake from "../Observers/Snake";
 import ActionInterface from "../Interfaces/ActionInterface";
+import CtrlAngleWorker from '../Workers/CtrlAngle.worker';
 
 export default class Control {
 
@@ -10,6 +11,8 @@ export default class Control {
   private startY: number = 0;
 
   private action: ActionInterface;
+
+  private ctrlAngleWorker: Worker = new CtrlAngleWorker();
 
   public constructor(
     private elementRocker: HTMLElement,
@@ -22,6 +25,8 @@ export default class Control {
     
     elementSpeedUp.ontouchstart = this.speedUpStart.bind(this);
     elementSpeedUp.ontouchend = this.speedUpEnd.bind(this);
+
+    this.ctrlAngleWorker.onmessage = this.handleCtrlAngleWorkerMessage.bind(this);
     this.action = container.get<ActionInterface>('action');
   }
 
@@ -64,8 +69,7 @@ export default class Control {
     const innerY = this.top + offsetY;
     this.elementRocker.style.left = `${innerX}px`;
     this.elementRocker.style.top = `${innerY}px`;
-    const angle = this.getAngle(clientX, clientY, offsetX, offsetY);
-    this.snake.onAngleChange(angle);
+    this.ctrlAngleWorker.postMessage([clientX, clientY, offsetX, offsetY, this.startX, this.startY]);
   }
 
   /**
@@ -80,23 +84,12 @@ export default class Control {
   }
 
   /**
-   * 获取角度
+   * 对 worker 中计算得到的角度值进行处理
    * 
-   * @param offsetX 摇杆内 x 轴偏移量
-   * @param offsetY 摇杆内 y 轴偏移量
+   * @param {MessageEvent} e
    */
-  private getAngle(clientX: number, clientY: number, offsetX: number, offsetY: number) {
-    const radian = 180 / Math.PI;
-    if (clientX >= this.startX && clientY >= this.startY) {
-      return Math.floor((Math.atan(offsetY / offsetX) * radian));
-    } else if (clientX <= this.startX && clientY >= this.startY) {
-      return Math.floor((Math.atan(-offsetX / offsetY) * radian)) + 90;
-    } else if (clientX < this.startX && clientY < this.startY) {
-      return Math.floor((Math.atan(-offsetY / -offsetX) * radian)) + 180;
-    } else if (clientX > this.startX && clientY < this.startY) {
-      return Math.floor((Math.atan(-offsetX / offsetY) * radian)) + 270;
-    }
-    return 0;
+  private handleCtrlAngleWorkerMessage(e: MessageEvent): void {
+    this.snake.onCtrlAngleChange(e.data);
   }
 
   /**
@@ -120,4 +113,8 @@ export default class Control {
     }
     return [offsetX, offsetY];
   }
+
+  public terminate(): void {
+    this.ctrlAngleWorker.terminate();
+  } 
 }

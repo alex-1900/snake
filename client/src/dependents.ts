@@ -5,6 +5,9 @@ import Action from "./Action";
 import Graphical from './Components/Graphical';
 import Layer from "./Components/Layer";
 import Material from "./Components/Material";
+import Snake from "./Observers/Snake";
+import Food from "./Observers/Food";
+import PublicMap from "./Observers/PublicMap";
 
 const elementApp = document.getElementById('app');
 

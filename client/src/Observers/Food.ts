@@ -4,6 +4,7 @@ import Layer from "../Components/Layer";
 import Graphical from "../Components/Graphical";
 import Material from "../Components/Material";
 import PublicMap from './PublicMap';
+import FoodMoveWorker from '../Workers/FoodMove.worker';
 
 function makeRandom(min: number, max: number) {
   const range = max - min;   
@@ -43,6 +44,10 @@ export default class Food extends Observer {
 
   private animates: Array<any> = [];
 
+  private foodMoveWorker: Worker = new FoodMoveWorker();
+
+  private handleScoreAdded: Function;
+
   public constructor() {
     super();
     this.layer = container.get<Layer>('Layer');
@@ -52,6 +57,7 @@ export default class Food extends Observer {
     this.graphical = container.make<Graphical>('Graphical', this.mapCanvas);
     this.context = this.canvas.getContext('2d');
     this.interfaceSize = container.get('interfaceSize');
+    this.foodMoveWorker.onmessage = this.handleFoodMoveWorkerMessage.bind(this);
 
     this.setStates({
       x: 0, y: 0,
@@ -92,12 +98,11 @@ export default class Food extends Observer {
     this.context.drawImage(this.mapCanvas, x, y, width, height, 0, 0, width, height);
   }
 
-  public onPositionChange(x: number, y: number, size: number): number {
+  public onPositionChange(x: number, y: number, size: number): void {
     const DIST = 10;
     const num = PublicMap.mapSize / TREE_SIZE - 1;
     const key = Math.floor(x / TREE_SIZE) * TREE_SIZE;
     const keys = [key];
-    let scores: number = 0;
     if (x - key < DIST && key > 0) {
       keys.push(key - 1);
     }
@@ -107,32 +112,36 @@ export default class Food extends Observer {
     for (const key of keys) {
       const _f = this.foods[key];
       for (const fkey in _f) {
-        const [ fx, fy, color ] = _f[fkey];
-        const r = size / 2;
-        if (this.collisionCheck(x + r, y + r, r, fx, fy, 4)) {
-          scores++;
-          this.animates.push([fx, fy, color]);
-          delete this.foods[key][fkey];
-        }
+        const [ fx, fy ] = _f[fkey];
+        this.foodMoveWorker.postMessage([x, y, size, fx, fy, key, fkey]);
       }
     }
     this.setStates({snx: x, sny: y});
-    return scores;
   }
 
-  private collisionCheck(
-    x1: number,
-    y1: number,
-    r1: number,
-    x2: number,
-    y2: number,
-    r2: number
-  ) {
-    const dist = Math.sqrt(
-      Math.pow(x1 - x2, 2) +
-      Math.pow(y1 - y2, 2)
-    );
-    return Boolean((r1 + r2) + 40 >= dist);
+  /**
+   * 注册一个加分回调
+   * 
+   * @param callback 加分接口
+   */
+  public onScoreAdded(callback: Function): void {
+    this.handleScoreAdded = callback;
+  }
+
+  /**
+   * 检测到接近食物后，触发吸附特效
+   * @param e data
+   */
+  private handleFoodMoveWorkerMessage(e: MessageEvent): void {
+    const [ key, fkey ] = e.data;
+    const food = this.foods[key][fkey];
+    if (food) {
+      this.animates.push([...food]);
+      delete this.foods[key][fkey];
+      if (this.handleScoreAdded) {
+        this.handleScoreAdded();
+      }
+    }
   }
 
   private buildTree(): void {

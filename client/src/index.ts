@@ -18,10 +18,6 @@ const elementGameover = document.getElementById('gameover');
 const action = container.get<ActionInterface>('action');
 const subject = container.get<SubjectInterface>('subject');
 
-action.onStop(function() {
-  elementGameover.style.display = 'block';
-});
-
 elementStartGame.onclick = function(event) {
   elementWelcome.style.display = 'none';
 
@@ -35,6 +31,11 @@ elementStartGame.onclick = function(event) {
   subject.register(snake);
 
   const controller = new Control(elementRocker, elementSpeedUp, snake);
+
+  action.onStop(function() {
+    controller.terminate();  // 结束控制器的 Worker
+    elementGameover.style.display = 'block';
+  });
 
   action.start();
 };

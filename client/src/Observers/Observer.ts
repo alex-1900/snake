@@ -11,13 +11,6 @@ export default abstract class Observer implements ObserverInterface {
   private timeMap = new Map<number, number>();
 
   /**
-   * 在动画刷新时将通知此接口，你应当在这里更新成员状态，而不是实质的渲染
-   * 
-   * @param timestamp 当前刷新的时间戳
-   */
-  public abstract update(timestamp: number): void;
-
-  /**
    * 批量设置状态
    * @param states 保存 states 的键值对
    */

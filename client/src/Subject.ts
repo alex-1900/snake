@@ -33,7 +33,9 @@ export default class Subject implements SubjectInterface {
    */
   notify(timestamp: number): void {
     this.observers.forEach(observer => {
-      observer.update(timestamp);
+      if (observer.update) {
+        observer.update(timestamp);
+      }
       if (observer.render && observer.needRepaint()) {
         observer.render();
         observer.repaint(false);

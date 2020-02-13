@@ -10,7 +10,7 @@ export default interface ObserverInterface
    * 
    * @param timestamp 当前刷新的时间戳
    */
-  update(timestamp: number): void;
+  update?(timestamp: number): void;
 
   /**
    * 在更新状态之后，会通知此接口，以便对画面进行渲染

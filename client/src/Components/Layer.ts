@@ -19,8 +19,8 @@ export default class Layer {
     const [width, height] = container.get('interfaceSize');
     canvas.width = width;
     canvas.height = height;
-    canvas.setAttribute('class', 'coincide');
     if (!offscreen) {
+      canvas.setAttribute('class', 'coincide');
       this.element.appendChild(canvas);
     }
     return canvas;

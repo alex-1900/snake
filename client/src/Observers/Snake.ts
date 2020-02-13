@@ -9,6 +9,7 @@ import { SnakeSection } from '../Types/BaseTypes';
 import PublicMap from './PublicMap';
 import ActionInterface from '../Interfaces/ActionInterface';
 import Food from './Food';
+import AngleWorker from '../Workers/Angle.worker';
 
 function makeRandom(min: number, max: number) {
   const range = max - min;   
@@ -23,15 +24,9 @@ export default class Snake extends Observer {
 
   private canvas: HTMLCanvasElement;
 
-  private offCanvas: HTMLCanvasElement;
-
   private layer: Layer;
 
   private context: CanvasRenderingContext2D;
-
-  private offLayer: Layer;
-
-  private offscreenContext: CanvasRenderingContext2D;
 
   private headContext: CanvasRenderingContext2D;
 
@@ -44,31 +39,32 @@ export default class Snake extends Observer {
 
   private positions: Array<any> = [];
 
+  private angleWorker: Worker = new AngleWorker();
+
   public constructor(
     private publicMap: PublicMap,
     private food: Food
   ) {
     super();
-    this.offLayer = container.get<Layer>('Layer');
-    this.offCanvas = this.offLayer.push(true);
-    this.offscreenContext = this.offCanvas.getContext('2d');
-
     const theme = makeRandom(SnakeType.Yellow, SnakeType.Cyan);
-
     this.layer = container.get<Layer>('Layer');
     this.canvas = this.layer.push();
     const graphical = container.make<Graphical>('Graphical', this.canvas);
     const material = container.get<Material>('Material');
     this.context = graphical.getContext();
+    this.context.globalAlpha = 1;
     const head = material.getSnakeHead(theme);
     this._head = head;
 
     this.head = material.makeCanvas(30, 30);
     this.headContext = this.head.getContext('2d');
+    this.headContext.globalAlpha = 1;
     this.headContext.translate(15, 15);
     this.headContext.drawImage(head, -15, -15);
-
     this.section = material.getSnakeSection(theme);
+    this.angleWorker.onmessage = this.handleAngleWorkerMessage.bind(this);
+
+    this.food.onScoreAdded(this.handleScoreAdded.bind(this));
 
     this.setStates({
       interfaceSize: container.get('interfaceSize'),
@@ -110,9 +106,9 @@ export default class Snake extends Observer {
    */
   public update(timestamp: number): void {
     // if (this.isOvertime(timestamp, 32)) {
-      const { x, y, speed, angle, toAngle, size, waitTime, scores, interfaceSize: [width, height] } = this.getStates();
+      const { x, y, speed, angle, toAngle, size, scores, interfaceSize: [width, height] } = this.getStates();
       if (angle !== toAngle) {
-        this.eachAngle();
+        this.angleWorker.postMessage([angle, toAngle, speed]);
         this.rotateHead();
       }
 
@@ -139,26 +135,30 @@ export default class Snake extends Observer {
       }
 
       // 食物检测
-      const ates = this.food.onPositionChange(nextX, nextY, size);
-      if (ates) {
-        if (scores >= 5) {
-          states.scores = scores - 5 + ates;
-          this.addSection();
-        } else {
-          states.scores = scores + ates;
-        }
-      }
+      this.food.onPositionChange(nextX, nextY, size);
       this.setStates(states);
     // }
+  }
+
+  private handleScoreAdded(): void {
+    const { scores } = this.getStates();
+    let newScores = scores;
+    if (scores >= 5) {
+      newScores = scores - 4; // -5 + 1
+      this.addSection();
+    } else {
+      newScores += 1;
+    }
+    this.setStates({scores: newScores});
   }
 
   /**
    * 渲染画面的接口
    */
   public render() {
-    const { size, x, y, mapX, mapY, sectionEnd, interfaceSize: [width, height] } = this.getStates();
+    const { x, y, mapX, mapY, sectionEnd } = this.getStates();
     const { size: hsize, x: hx, y: hy } = this.getHistory();
-    const { offscreenContext, context } = this;
+    const { context } = this;
 
     if (sectionEnd) {
       this.positions.shift();
@@ -187,7 +187,7 @@ export default class Snake extends Observer {
    * 渲染蛇身
    */
   private renderSections(): void {
-    const { size, mapX, mapY } = this.getStates();
+    const { mapX, mapY } = this.getStates();
     const { context } = this;
 
     const reverseStore: Array<any> = [];
@@ -240,37 +240,17 @@ export default class Snake extends Observer {
     this.setStates({sectionEnd: false});
   }
 
-  public onAngleChange(angle: number): void {
+  public onCtrlAngleChange(angle: number): void {
     this.setStates({toAngle: angle});
   }
 
-  /**
-   * 得到一次更新的角度
-   */
-  private eachAngle() {
-    const { angle, toAngle, speed } = this.getStates();
-    let nextAngle = angle;
-    const accelerate = speed * 2.8;
-    const step = toAngle - angle;
-    if (Math.abs(toAngle - angle) <= 180 && step !== 0) {
-      nextAngle += step > 0 ? accelerate : -accelerate;
-    } else if (Math.abs(toAngle - angle) > 180 && step !== 0) {
-      nextAngle += step > 0 ? -accelerate : accelerate;
-    }
-    if (angle > 360) {
-      nextAngle -= 360
-    }
-    if (angle <= 0) {
-      nextAngle += 360
-    }
-    if (Math.abs(toAngle - angle) < accelerate) {
-      nextAngle = toAngle;
-    }
-    this.setStates({angle: nextAngle});
+  private handleAngleWorkerMessage(e: any) {
+    this.setStates({angle: e.data});
   }
 
   public terminate() {
     const element = this.layer.getElement();
     element.removeChild(this.canvas);
+    this.angleWorker.terminate();
   }
 }
