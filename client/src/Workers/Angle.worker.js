@@ -3,19 +3,24 @@ onmessage = function(e) {
   let nextAngle = angle;
   const accelerate = speed * 2.8;
   const step = toAngle - angle;
-  if (Math.abs(toAngle - angle) <= 180 && step !== 0) {
-    nextAngle += step > 0 ? accelerate : -accelerate;
-  } else if (Math.abs(toAngle - angle) > 180 && step !== 0) {
-    nextAngle += step > 0 ? -accelerate : accelerate;
+  const absStep = Math.abs(step);
+
+  const fixed = Math.min(absStep, accelerate);
+  if (absStep <= 180) {
+    nextAngle += step > 0 ? fixed : -fixed;
+  } else if (absStep > 180) {
+    nextAngle += step > 0 ? -fixed : fixed;
   }
-  if (angle > 360) {
+
+  if (nextAngle > 360) {
     nextAngle -= 360
   }
-  if (angle <= 0) {
+  if (nextAngle < 0) {
     nextAngle += 360
   }
-  if (Math.abs(toAngle - angle) < accelerate) {
-    nextAngle = toAngle;
-  }
-  postMessage(nextAngle);
+
+  // if (absStep < accelerate) {
+  //   nextAngle = toAngle;
+  // }
+  postMessage(Math.floor(nextAngle));
 }

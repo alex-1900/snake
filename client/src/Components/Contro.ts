@@ -10,6 +10,8 @@ export default class Control {
   private startX: number = 0;
   private startY: number = 0;
 
+  private isHorizon: boolean;
+
   private action: ActionInterface;
 
   private ctrlAngleWorker: Worker = new CtrlAngleWorker();
@@ -28,6 +30,9 @@ export default class Control {
 
     this.ctrlAngleWorker.onmessage = this.handleCtrlAngleWorkerMessage.bind(this);
     this.action = container.get<ActionInterface>('action');
+
+    const { clientWidth, clientHeight } = document.body;
+    this.isHorizon = Boolean(clientWidth > clientHeight);
   }
 
   speedUpStart(event: TouchEvent) {
@@ -69,7 +74,7 @@ export default class Control {
     const innerY = this.top + offsetY;
     this.elementRocker.style.left = `${innerX}px`;
     this.elementRocker.style.top = `${innerY}px`;
-    this.ctrlAngleWorker.postMessage([clientX, clientY, offsetX, offsetY, this.startX, this.startY]);
+    this.ctrlAngleWorker.postMessage([clientX, clientY, offsetX, offsetY, this.startX, this.startY, this.isHorizon]);
   }
 
   /**

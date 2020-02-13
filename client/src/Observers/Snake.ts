@@ -100,7 +100,7 @@ export default class Snake extends Observer {
    * @param timestamp 时间戳
    */
   public update(timestamp: number): void {
-    // if (this.isOvertime(timestamp, 32)) {
+    // if (this.isOvertime(timestamp, 128)) {
       const { x, y, speed, angle, toAngle, size, scores, interfaceSize: [width, height] } = this.getStates();
       if (angle !== toAngle) {
         this.angleWorker.postMessage([angle, toAngle, speed]);
