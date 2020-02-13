@@ -1,3 +1,4 @@
+import { makeRandom } from '../commons';
 import Observer from './Observer';
 import container from "../dependents";
 import Layer from "../Components/Layer";
@@ -5,12 +6,6 @@ import Graphical from "../Components/Graphical";
 import Material from "../Components/Material";
 import PublicMap from './PublicMap';
 import FoodMoveWorker from '../Workers/FoodMove.worker';
-
-function makeRandom(min: number, max: number) {
-  const range = max - min;   
-  const rand = Math.random();   
-  return(min + Math.round(rand * range));  
-}
 
 const foodColors: Array<string> = [
   '#F08080',

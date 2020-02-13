@@ -1,5 +1,6 @@
 import Observer from './Observer';
 import container from '../dependents';
+import { makeRandom } from '../commons';
 import Layer from '../Components/Layer';
 import Graphical from '../Components/Graphical';
 import Material from '../Components/Material';
@@ -10,12 +11,6 @@ import PublicMap from './PublicMap';
 import ActionInterface from '../Interfaces/ActionInterface';
 import Food from './Food';
 import AngleWorker from '../Workers/Angle.worker';
-
-function makeRandom(min: number, max: number) {
-  const range = max - min;   
-  const rand = Math.random();   
-  return(min + Math.round(rand * range));  
-}
 
 /**
  * 蛇对象，控制蛇的动作与渲染
