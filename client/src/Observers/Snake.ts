@@ -11,6 +11,8 @@ import PublicMap from './PublicMap';
 import ActionInterface from '../Interfaces/ActionInterface';
 import Food from './Food';
 import AngleWorker from '../Workers/Angle.worker';
+import SnakeHead from '../Mixed/SnakeHead';
+import SnakeBody from '../Mixed/SnakeBody';
 
 /**
  * 蛇对象，控制蛇的动作与渲染
@@ -23,58 +25,56 @@ export default class Snake extends Observer {
 
   private context: CanvasRenderingContext2D;
 
-  private headContext: CanvasRenderingContext2D;
-
-  private head: HTMLCanvasElement;
-  private _head: HTMLCanvasElement;
-
-  private section: HTMLCanvasElement;
-
-  private sections: Array<SnakeSection> = [];
-
-  private positions: Array<any> = [];
+  private waitTime: number = 18;
 
   private angleWorker: Worker = new AngleWorker();
+
+  private snakeHead: SnakeHead;
+
+  private snakeBody: SnakeBody;
+
+  private interfaceWidth: number;
+
+  private interfaceHeight: number;
+
+  private scores: number = 0;
+
+  private toAngle: number = 0;
+
+  private angle: number = 0;
+
+  private mapX: number = 0;
+
+  private mapY: number = 0;
 
   public constructor(
     private publicMap: PublicMap,
     private food: Food
   ) {
     super();
-    const theme = makeRandom(SnakeType.Yellow, SnakeType.Cyan);
     this.layer = container.get<Layer>('Layer');
     this.canvas = this.layer.push();
-    const graphical = container.make<Graphical>('Graphical', this.canvas);
-    const material = container.get<Material>('Material');
-    this.context = graphical.getContext();
-    this.context.globalAlpha = 1;
-    const head = material.getSnakeHead(theme);
-    this._head = head;
+    this.context = this.canvas.getContext('2d');
 
-    this.head = material.makeCanvas(30, 30);
-    this.headContext = this.head.getContext('2d');
-    this.headContext.globalAlpha = 1;
-    this.headContext.translate(15, 15);
-    this.headContext.drawImage(head, -15, -15);
-    this.section = material.getSnakeSection(theme);
-    this.angleWorker.onmessage = this.handleAngleWorkerMessage.bind(this);
+    const size = 30;
+    const theme = makeRandom(SnakeType.Yellow, SnakeType.Cyan);
+    this.snakeHead = new SnakeHead(this.context, theme, size);
+    this.snakeBody = new SnakeBody(this.context, theme, size);
 
     this.food.onScoreAdded(this.handleScoreAdded.bind(this));
+    this.angleWorker.onmessage = this.handleAngleWorkerMessage.bind(this);
+
+    const [ width, height ] = container.get('interfaceSize');
+    this.interfaceWidth = width;
+    this.interfaceHeight = height;
+    const initX = Math.floor(width / 2 - size / 2);
+    const initY = Math.floor(height / 2 - size / 2);
 
     this.setStates({
-      interfaceSize: container.get('interfaceSize'),
-      x: 500,
-      y: 600,
-      size: 30,
-      waitTime: 18,
+      x: initX,
+      y: initY,
+      size,
       speed: 2,
-      angle: 0,
-      toAngle: 0,
-      sectionEnd: false,
-
-      mapX: 0,
-      mapY: 0,
-      scores: 0,
     });
 
     {
@@ -86,12 +86,8 @@ export default class Snake extends Observer {
   }
 
   private rotateHead() {
-    const { angle } = this.getStates();
-    this.headContext.save();
-    this.headContext.clearRect(-20, -20, 40, 40);
-    this.headContext.rotate(angle * RADIAN);
-    this.headContext.drawImage(this._head, -15, -15);
-    this.headContext.restore();
+    const { angle } = this;
+    this.snakeHead.rotate(angle);
   }
 
   /**
@@ -101,7 +97,8 @@ export default class Snake extends Observer {
    */
   public update(timestamp: number): void {
     // if (this.isOvertime(timestamp, 128)) {
-      const { x, y, speed, angle, toAngle, size, scores, interfaceSize: [width, height] } = this.getStates();
+      const { x, y, speed, size } = this.getStates();
+      const { toAngle, angle } = this;
       if (angle !== toAngle) {
         this.angleWorker.postMessage([angle, toAngle, speed]);
         this.rotateHead();
@@ -110,17 +107,15 @@ export default class Snake extends Observer {
       let states: {[key: string]: any} = {};
       const nextX = speed * Math.cos(angle * RADIAN) + x;
       const nextY = speed * Math.sin(angle * RADIAN) + y;
-      this.positions.push([nextX, nextY]);
+      this.snakeBody.push(nextX, nextY);
 
       const fixR = size / 2;
-      const mapX = nextX - width / 2 + fixR;
-      const mapY = nextY - height / 2 + fixR;
-      this.publicMap.updateMaxPosition(mapX, mapY);
+      this.mapX = nextX - this.interfaceWidth / 2 + fixR;
+      this.mapY = nextY - this.interfaceHeight / 2 + fixR;
+      this.publicMap.updateMaxPosition(this.mapX, this.mapY);
       states = {
         x: nextX,
         y: nextY,
-        mapX,
-        mapY,
       };
 
       const maxPos = PublicMap.mapSize - size;
@@ -135,8 +130,51 @@ export default class Snake extends Observer {
     // }
   }
 
+  /**
+   * 渲染画面的接口
+   */
+  public render() {
+    const { x, y } = this.getStates();
+    const { size: hsize, x: hx, y: hy } = this.getHistory();
+    const { mapX, mapY } = this;
+
+    this.snakeBody.clear();
+    this.snakeHead.clearRect(hx - mapX, hy - mapY, hsize);
+
+    this.snakeBody.render(mapX, mapY);
+    this.snakeHead.render(x - mapX, y - mapY);
+  }
+
+  /**
+   * 摇杆的角度改变时调用的接口
+   * @param angle 角度
+   */
+  public onCtrlAngleChange(angle: number): void {
+    this.toAngle = angle;
+  }
+
+  /**
+   * 在得到 worker 计算的角度后更新当前的状态
+   * @param {MessageEvent} e
+   */
+  private handleAngleWorkerMessage(e: MessageEvent) {
+    this.angle = e.data;
+  }
+
+  /**
+   * 添加一截蛇身
+   */
+  private addSection() {
+    const { x, y, speed } = this.getStates();
+    this.snakeBody.add(x, y, speed, this.waitTime)
+  }
+
+  /**
+   * 当 Food 对象判定得分后更新当前的状态
+   * 分数对于用户没有交互 只用于改变蛇的长度
+   */
   private handleScoreAdded(): void {
-    const { scores } = this.getStates();
+    const { scores } = this;
     let newScores = scores;
     if (scores >= 5) {
       newScores = scores - 4; // -5 + 1
@@ -144,103 +182,7 @@ export default class Snake extends Observer {
     } else {
       newScores += 1;
     }
-    this.setStates({scores: newScores});
-  }
-
-  /**
-   * 渲染画面的接口
-   */
-  public render() {
-    const { x, y, mapX, mapY, sectionEnd } = this.getStates();
-    const { size: hsize, x: hx, y: hy } = this.getHistory();
-    const { context } = this;
-
-    if (sectionEnd) {
-      this.positions.shift();
-    }
-
-    this.clearSections();
-    context.clearRect(hx - mapX - 5, hy - mapY - 5, hsize + 10, hsize + 10);
-
-    this.renderSections();
-    context.drawImage(this.head, x - mapX, y - mapY);
-  }
-
-  /**
-   * 清除蛇身
-   */
-  private clearSections(): void {
-    const { size: hsize } = this.getHistory();
-    const { context } = this;
-
-    for (const section of this.sections) {
-      context.clearRect(section.lastX - 5, section.lastY - 5, hsize + 10, hsize + 10);
-    }
-  }
-
-  /**
-   * 渲染蛇身
-   */
-  private renderSections(): void {
-    const { mapX, mapY } = this.getStates();
-    const { context } = this;
-
-    const reverseStore: Array<any> = [];
-    for (const section of this.sections) {
-      if (0 !== section.waitTime) {
-        section.waitTime--;
-        break;  // 后面的必等待
-      }
-      const position = this.positions[section.position];
-      if (position) {
-        const [x, y] = position;
-        reverseStore.unshift([x, y]);
-        if (section.isLast) {
-          this.setStates({sectionEnd: true});
-        }
-        if (! this.getStates().sectionEnd) {
-          section.position++;
-        }
-        section.lastX = x - mapX;
-        section.lastY = y - mapY;
-      }
-    }
-
-    for (const [x, y] of reverseStore) {
-      context.drawImage(this.section, x - mapX, y - mapY);
-    }
-  }
-
-  /**
-   * 添加一截蛇身
-   */
-  private addSection() {
-    const { x, y, speed, waitTime } = this.getStates();
-    const newWaitTime = waitTime / speed;
-    const lastSection = this.sections[this.sections.length - 1];
-    let lastX = x;
-    let lastY = y;
-    if (lastSection) {
-      lastSection.isLast = false;
-      lastX = lastSection.lastX;
-      lastY = lastSection.lastY;
-    }
-    this.sections.push({
-      isLast: true,
-      lastX,
-      lastY,
-      waitTime: newWaitTime,
-      position: 0
-    });
-    this.setStates({sectionEnd: false});
-  }
-
-  public onCtrlAngleChange(angle: number): void {
-    this.setStates({toAngle: angle});
-  }
-
-  private handleAngleWorkerMessage(e: any) {
-    this.setStates({angle: e.data});
+    this.scores = newScores;
   }
 
   public terminate() {

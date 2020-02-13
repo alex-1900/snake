@@ -1,4 +1,6 @@
-onmessage = function(e) {
+const webWorker: Worker = self as any;
+
+webWorker.addEventListener('message', function(e: MessageEvent) {
   const [ angle, toAngle, speed ] = e.data;
   let nextAngle = angle;
   const accelerate = speed * 2.8;
@@ -19,8 +21,10 @@ onmessage = function(e) {
     nextAngle += 360
   }
 
-  // if (absStep < accelerate) {
-  //   nextAngle = toAngle;
-  // }
-  postMessage(Math.floor(nextAngle));
-}
+  if (absStep < accelerate) {
+    nextAngle = toAngle;
+  }
+  webWorker.postMessage(Math.floor(nextAngle));
+});
+
+export default null as any;

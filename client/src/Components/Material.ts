@@ -2,12 +2,19 @@ import container from '../dependents';
 import Graphical from './Graphical';
 import { SnakeType } from '../Enums/MaterialEnum';
 
+export const snakeTheme: {[key: number]: string[]} = {
+  [SnakeType.Red]: ['#B22222', '#8B0000'],
+  [SnakeType.Yellow]: ['#FFD700', '#DAA520'],
+  [SnakeType.Blue]: ['#4682B4', '#000080'],
+  [SnakeType.Cyan]: ['#00CED1', '#20B2AA']
+};
+
 export default class Material {
 
   private snakeHeads: {[key: number]: HTMLCanvasElement} = {};
   private snakeSections: {[key: number]: HTMLCanvasElement} = {};
 
-  constructor() {
+  public constructor() {
     const size = 30;
     this.snakeHeads[SnakeType.Red] = this.snakeHeadToCanvas('#B22222', size);
     this.snakeHeads[SnakeType.Yellow] = this.snakeHeadToCanvas('#FFD700', size);
@@ -48,7 +55,7 @@ export default class Material {
    * @param color 蛇头颜色
    * @param size 画布大小
    */
-  private snakeHeadToCanvas(color: string, size: number): HTMLCanvasElement {
+  public snakeHeadToCanvas(color: string, size: number): HTMLCanvasElement {
     const canvas = this.makeCanvas(size, size);
     const graphical = container.make<Graphical>('Graphical', canvas);
     graphical.snakeHead(size/2, size/2, size/2, color);
@@ -62,7 +69,7 @@ export default class Material {
    * @param sColor 副色
    * @param size 画布大小
    */
-  private snakeSectionToCanvas(pColor: string, sColor: string, size: number): HTMLCanvasElement {
+  public snakeSectionToCanvas(pColor: string, sColor: string, size: number): HTMLCanvasElement {
     const canvas = this.makeCanvas(80, 80);
     const graphical = container.make<Graphical>('Graphical', canvas);
     graphical.snakeSection(size/2, size/2, size/2, pColor, sColor);

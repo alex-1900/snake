@@ -11,7 +11,8 @@ module.exports = {
   entry: ENTRY_FILE,
   output: {
     path: DIST_PATH,
-    filename: OUTPUT_FILE
+    filename: OUTPUT_FILE,
+    globalObject: 'this',
   },
   // devtool: 'inline-source-map',
   devServer: {
@@ -21,6 +22,13 @@ module.exports = {
   },
   module: {
     rules: [
+      {
+        test: /\.worker\.ts$/,
+        use: {
+          loader: 'worker-loader',
+          options: { inline: true }
+        }
+      },
       {test: /\.css$/, use: ['style-loader', 'css-loader']},
       {test: /\.(png|jpe?g|gif|svg|eot|ttf|woff|woff2|otf)$/, use: ['file-loader', 'url-loader']},
       {
@@ -53,10 +61,6 @@ module.exports = {
           // Compiles Sass to CSS
           'sass-loader',
         ],
-      },
-      {
-        test: /\.worker\.js$/,
-        use: { loader: 'worker-loader' }
       }
     ]
   },

@@ -17,6 +17,10 @@ export default class PublicMap extends Observer {
   
   private interfaceSize: number[];
 
+  private x: number = 0;
+
+  private y: number = 0;
+
   static mapSize: number = 1200;
 
   public constructor(
@@ -29,24 +33,25 @@ export default class PublicMap extends Observer {
     const material = container.get<Material>('Material');
     this.mapCanvas = material.getMap(PublicMap.mapSize);
     this.context = graphical.getContext();
-
     this.interfaceSize = container.get('interfaceSize');
+  }
 
-    this.setStates({
-      x: 0,
-      y: 0
-    });
+  public update(timestamp: number): void {
+    if (this.isOvertime(timestamp, 32)) {
+      this.repaint(true);
+    }
   }
 
   public render() {
     const [ width, height ] = this.interfaceSize;
-    const { x, y } = this.getStates();
+    const { x, y } = this;
     this.context.clearRect(0, 0, width, height);
     this.context.drawImage(this.mapCanvas, x, y, width, height, 0, 0, width, height);
   }
 
   public updateMaxPosition(x: number, y: number) {
-    this.setStates({x, y});
+    this.x = x;
+    this.y = y;
     this.food.setStates({x, y});
   }
 
