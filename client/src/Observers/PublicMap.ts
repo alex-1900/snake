@@ -1,15 +1,12 @@
 import Observer from "./Observer";
 import container from "../dependents";
-import Layer from "../Components/Layer";
-import Graphical from "../Components/Graphical";
 import Material from "../Components/Material";
 import Food from "./Food";
+import { makeCanvas } from "../compatibles";
 
 export default class PublicMap extends Observer {
 
   private canvas: HTMLCanvasElement;
-
-  private layer: Layer;
 
   private context: CanvasRenderingContext2D;
 
@@ -27,12 +24,10 @@ export default class PublicMap extends Observer {
     private food: Food
   ) {
     super();
-    this.layer = container.get<Layer>('Layer');
-    this.canvas = this.layer.push();
-    const graphical = container.make<Graphical>('Graphical', this.canvas);
+    this.canvas = makeCanvas();
     const material = container.get<Material>('Material');
     this.mapCanvas = material.getMap(PublicMap.mapSize);
-    this.context = graphical.getContext();
+    this.context = this.canvas.getContext('2d');
     this.interfaceSize = container.get('interfaceSize');
   }
 
@@ -56,7 +51,7 @@ export default class PublicMap extends Observer {
   }
 
   public terminate() {
-    const element = this.layer.getElement();
-    element.removeChild(this.canvas);
+    const elementApp = container.get<HTMLElement>('elementApp');
+    elementApp.removeChild(this.canvas);
   } 
 }

@@ -11,7 +11,7 @@ export default class SnakeBody {
 
   private sourceCanvas: HTMLCanvasElement;
 
-  private isEnd: boolean = false;
+  private isEnd: boolean = true;
 
   public constructor(
     private context: CanvasRenderingContext2D,
@@ -41,8 +41,8 @@ export default class SnakeBody {
     const reverseStore: number[][] = [];
 
     for (const body of this.bodys) {
-      if (0 !== body.waitTime) {
-        body.waitTime--;
+      if (0 <= body.waitTime) {
+        body.waitTime -= 1;
         break;  // 后面的必等待
       }
       const position = this.positions[body.position];
@@ -65,9 +65,10 @@ export default class SnakeBody {
     }
   }
 
-  public add(x: number, y: number, speed: number, waitTime: number): void {
-    const newWaitTime: number = waitTime / speed;
+  public add(): void {
+    const newWaitTime: number = 4; //Math.round(waitTime / speed);
     const lastSection: SnakeSection = this.bodys[this.bodys.length - 1];
+    const [ x, y ] = this.positions[0];
     let lastX = x;
     let lastY = y;
     if (lastSection) {

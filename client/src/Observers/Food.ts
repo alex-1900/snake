@@ -1,11 +1,10 @@
-import { makeRandom } from '../commons';
 import Observer from './Observer';
 import container from "../dependents";
-import Layer from "../Components/Layer";
 import Graphical from "../Components/Graphical";
 import Material from "../Components/Material";
 import PublicMap from './PublicMap';
 import FoodMoveWorker from '../Workers/FoodMove.worker';
+import { makeRandom, makeCanvas } from '../compatibles';
 
 const foodColors: Array<string> = [
   '#F08080',
@@ -22,8 +21,6 @@ const TREE_SIZE = 100;
 export default class Food extends Observer {
 
   private canvas: HTMLCanvasElement;
-
-  private layer: Layer;
 
   private context: CanvasRenderingContext2D;
 
@@ -45,12 +42,15 @@ export default class Food extends Observer {
 
   public constructor() {
     super();
-    this.layer = container.get<Layer>('Layer');
-    this.canvas = this.layer.push();
+    // 渲染 canvas
+    this.canvas = makeCanvas();
+    this.context = this.canvas.getContext('2d');
+
+    // 离屏 canvas
     const material = container.get<Material>('Material');
     this.mapCanvas = material.getMap(PublicMap.mapSize, false);
     this.graphical = container.make<Graphical>('Graphical', this.mapCanvas);
-    this.context = this.canvas.getContext('2d');
+
     this.interfaceSize = container.get('interfaceSize');
     this.foodMoveWorker.onmessage = this.handleFoodMoveWorkerMessage.bind(this);
 
@@ -64,7 +64,6 @@ export default class Food extends Observer {
   }
 
   public update(timestamp: number): void {
-    // pass
     const { snx, sny } = this.getStates();
     for (const key in this.animates) {
       const [ x, y, color ] = this.animates[key];
@@ -162,7 +161,7 @@ export default class Food extends Observer {
   }
 
   public terminate() {
-    const element = this.layer.getElement();
-    element.removeChild(this.canvas);
+    const elementApp = container.get<HTMLElement>('elementApp');
+    elementApp.removeChild(this.canvas);
   } 
 }

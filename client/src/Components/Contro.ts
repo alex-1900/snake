@@ -37,16 +37,12 @@ export default class Control {
 
   speedUpStart(event: TouchEvent) {
     event.preventDefault();
-    if (this.action.isRunning) {
-      this.action.pause();
-    } else {
-      this.action.start();
-    }
+    this.snake.speedUp();
   }
 
   speedUpEnd(event: TouchEvent) {
     event.preventDefault();
-    // this.snake.setStates({speed: 2});
+    this.snake.speedDown();
   }
 
   /**

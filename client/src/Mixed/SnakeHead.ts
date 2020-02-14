@@ -2,6 +2,7 @@ import container from "../dependents";
 import Material, { snakeTheme } from '../Components/Material';
 import { SnakeType } from "../Enums/MaterialEnum";
 import { RADIAN } from "../constants";
+import { makeCanvas } from "../compatibles";
 
 export default class SnakeHead {
 
@@ -25,7 +26,7 @@ export default class SnakeHead {
     this.sourceContext.globalAlpha = 1;
 
     const halfSize = size / 2;
-    this.offscreenCanvas = material.makeCanvas(size, size);
+    this.offscreenCanvas = makeCanvas(size, size, true);
     this.offscreenContext = this.offscreenCanvas.getContext('2d');
     this.offscreenContext.translate(halfSize, halfSize);
     this.offscreenContext.drawImage(this.sourceCanvas, -halfSize, -halfSize);

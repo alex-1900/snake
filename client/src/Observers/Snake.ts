@@ -1,18 +1,14 @@
 import Observer from './Observer';
 import container from '../dependents';
-import { makeRandom } from '../commons';
-import Layer from '../Components/Layer';
-import Graphical from '../Components/Graphical';
-import Material from '../Components/Material';
 import { SnakeType } from '../Enums/MaterialEnum';
 import { RADIAN } from '../constants';
-import { SnakeSection } from '../Types/BaseTypes';
 import PublicMap from './PublicMap';
 import ActionInterface from '../Interfaces/ActionInterface';
 import Food from './Food';
 import AngleWorker from '../Workers/Angle.worker';
 import SnakeHead from '../Mixed/SnakeHead';
 import SnakeBody from '../Mixed/SnakeBody';
+import { makeRandom, makeCanvas } from '../compatibles';
 
 /**
  * 蛇对象，控制蛇的动作与渲染
@@ -20,8 +16,6 @@ import SnakeBody from '../Mixed/SnakeBody';
 export default class Snake extends Observer {
 
   private canvas: HTMLCanvasElement;
-
-  private layer: Layer;
 
   private context: CanvasRenderingContext2D;
 
@@ -47,16 +41,17 @@ export default class Snake extends Observer {
 
   private mapY: number = 0;
 
+  private framerate: number = 32;
+
   public constructor(
     private publicMap: PublicMap,
     private food: Food
   ) {
     super();
-    this.layer = container.get<Layer>('Layer');
-    this.canvas = this.layer.push();
+    this.canvas = makeCanvas();
     this.context = this.canvas.getContext('2d');
 
-    const size = 30;
+    const size = 32;
     const theme = makeRandom(SnakeType.Yellow, SnakeType.Cyan);
     this.snakeHead = new SnakeHead(this.context, theme, size);
     this.snakeBody = new SnakeBody(this.context, theme, size);
@@ -74,20 +69,11 @@ export default class Snake extends Observer {
       x: initX,
       y: initY,
       size,
-      speed: 2,
+      speed: 4,
     });
+    this.snakeBody.push(initX, initY);
 
-    {
-      let i = 6;
-      while (i--) {
-        this.addSection();
-      }
-    }
-  }
-
-  private rotateHead() {
-    const { angle } = this;
-    this.snakeHead.rotate(angle);
+    for (let i = 0; i < 5; i++) this.snakeBody.add();
   }
 
   /**
@@ -96,38 +82,41 @@ export default class Snake extends Observer {
    * @param timestamp 时间戳
    */
   public update(timestamp: number): void {
-    // if (this.isOvertime(timestamp, 128)) {
+    if (this.isOvertime(timestamp, this.framerate)) {
       const { x, y, speed, size } = this.getStates();
       const { toAngle, angle } = this;
+
+      // 转动事件
       if (angle !== toAngle) {
         this.angleWorker.postMessage([angle, toAngle, speed]);
-        this.rotateHead();
+        this.snakeHead.rotate(this.angle);
       }
 
-      let states: {[key: string]: any} = {};
+      // 根据角度获取坐标
       const nextX = speed * Math.cos(angle * RADIAN) + x;
       const nextY = speed * Math.sin(angle * RADIAN) + y;
+
+      // 向蛇身队列中添加坐标
       this.snakeBody.push(nextX, nextY);
 
+      // 更新地图坐标
       const fixR = size / 2;
       this.mapX = nextX - this.interfaceWidth / 2 + fixR;
       this.mapY = nextY - this.interfaceHeight / 2 + fixR;
       this.publicMap.updateMaxPosition(this.mapX, this.mapY);
-      states = {
-        x: nextX,
-        y: nextY,
-      };
 
+      // 比较坐标与食物的距离
+      this.food.onPositionChange(nextX, nextY, size);
+
+      // 撞墙检测
       const maxPos = PublicMap.mapSize - size;
       if (nextX <= 0 || nextY <= 0 || nextX >= maxPos || nextY >= maxPos) {
         const action = container.get<ActionInterface>('action');
         action.stop();
       }
 
-      // 食物检测
-      this.food.onPositionChange(nextX, nextY, size);
-      this.setStates(states);
-    // }
+      this.setStates({x: nextX, y: nextY});
+    }
   }
 
   /**
@@ -153,20 +142,20 @@ export default class Snake extends Observer {
     this.toAngle = angle;
   }
 
+  public speedUp(): void {
+    this.framerate = 16;
+  }
+
+  public speedDown(): void {
+    this.framerate = 32;
+  }
+
   /**
    * 在得到 worker 计算的角度后更新当前的状态
    * @param {MessageEvent} e
    */
   private handleAngleWorkerMessage(e: MessageEvent) {
     this.angle = e.data;
-  }
-
-  /**
-   * 添加一截蛇身
-   */
-  private addSection() {
-    const { x, y, speed } = this.getStates();
-    this.snakeBody.add(x, y, speed, this.waitTime)
   }
 
   /**
@@ -178,7 +167,7 @@ export default class Snake extends Observer {
     let newScores = scores;
     if (scores >= 5) {
       newScores = scores - 4; // -5 + 1
-      this.addSection();
+      this.snakeBody.add();
     } else {
       newScores += 1;
     }
@@ -186,8 +175,8 @@ export default class Snake extends Observer {
   }
 
   public terminate() {
-    const element = this.layer.getElement();
-    element.removeChild(this.canvas);
+    const elementApp = container.get<HTMLElement>('elementApp');
+    elementApp.removeChild(this.canvas);
     this.angleWorker.terminate();
   }
 }
