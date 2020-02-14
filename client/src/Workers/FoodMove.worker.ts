@@ -13,7 +13,7 @@ function collisionCheck(
 webWorker.addEventListener('message', function(e) {
   const [ x, y, size, fx, fy, key, fkey ] = e.data;
   const r = size / 2;
-  if (collisionCheck(x + r, y + r, r, fx, fy, 4)) {
+  if (collisionCheck(x + r, y + size / 3, r, fx, fy, 4)) {
     webWorker.postMessage([key, fkey]);
   }
 });
