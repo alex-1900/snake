@@ -2,6 +2,7 @@ import { SnakeSection } from '../Types/BaseTypes';
 import container from "../dependents";
 import Material, { snakeTheme } from '../Components/Material';
 import { SnakeType } from '../Enums/MaterialEnum';
+import { SNAKE_SIZE } from '../constants';
 
 export default class SnakeBody {
 
@@ -15,12 +16,11 @@ export default class SnakeBody {
 
   public constructor(
     private context: CanvasRenderingContext2D,
-    theme: SnakeType,
-    private size: number
+    theme: SnakeType
   ) {
     const material = container.get<Material>('Material');
     const [ primaryColor, secondaryColor ] = snakeTheme[theme];
-    this.sourceCanvas = material.snakeSectionToCanvas(primaryColor, secondaryColor, size);
+    this.sourceCanvas = material.snakeSectionToCanvas(primaryColor, secondaryColor, SNAKE_SIZE);
   }
 
   public push(x: number, y: number): void {
@@ -29,7 +29,7 @@ export default class SnakeBody {
 
   public clear(): void {
     for (const section of this.bodys) {
-      this.context.clearRect(section.lastX - 5, section.lastY - 5, this.size + 10, this.size + 10);
+      this.context.clearRect(section.lastX - 5, section.lastY - 5, SNAKE_SIZE + 10, SNAKE_SIZE + 10);
     }
   }
 

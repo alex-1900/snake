@@ -1,7 +1,7 @@
 import Observer from './Observer';
 import container from '../dependents';
 import { SnakeType } from '../Enums/MaterialEnum';
-import { RADIAN } from '../constants';
+import { RADIAN, SNAKE_SIZE } from '../constants';
 import PublicMap from './PublicMap';
 import ActionInterface from '../Interfaces/ActionInterface';
 import Food from './Food';
@@ -51,10 +51,9 @@ export default class Snake extends Observer {
     this.canvas = makeCanvas();
     this.context = this.canvas.getContext('2d');
 
-    const size = 32;
     const theme = makeRandom(SnakeType.Yellow, SnakeType.Cyan);
-    this.snakeHead = new SnakeHead(this.context, theme, size);
-    this.snakeBody = new SnakeBody(this.context, theme, size);
+    this.snakeHead = new SnakeHead(this.context, theme);
+    this.snakeBody = new SnakeBody(this.context, theme);
 
     this.food.onScoreAdded(this.handleScoreAdded.bind(this));
     this.angleWorker.onmessage = this.handleAngleWorkerMessage.bind(this);
@@ -62,13 +61,12 @@ export default class Snake extends Observer {
     const [ width, height ] = container.get('interfaceSize');
     this.interfaceWidth = width;
     this.interfaceHeight = height;
-    const initX = Math.floor(width / 2 - size / 2);
-    const initY = Math.floor(height / 2 - size / 2);
+    const initX = Math.floor(width / 2 - SNAKE_SIZE / 2);
+    const initY = Math.floor(height / 2 - SNAKE_SIZE / 2);
 
     this.setStates({
       x: initX,
       y: initY,
-      size,
       speed: 4,
     });
     this.snakeBody.push(initX, initY);
@@ -83,7 +81,7 @@ export default class Snake extends Observer {
    */
   public update(timestamp: number): void {
     if (this.isOvertime(timestamp, this.framerate)) {
-      const { x, y, speed, size } = this.getStates();
+      const { x, y, speed } = this.getStates();
       const { toAngle, angle } = this;
 
       // 转动事件
@@ -100,16 +98,16 @@ export default class Snake extends Observer {
       this.snakeBody.push(nextX, nextY);
 
       // 更新地图坐标
-      const fixR = size / 2;
+      const fixR = SNAKE_SIZE / 2;
       this.mapX = nextX - this.interfaceWidth / 2 + fixR;
       this.mapY = nextY - this.interfaceHeight / 2 + fixR;
       this.publicMap.updateMaxPosition(this.mapX, this.mapY);
 
       // 比较坐标与食物的距离
-      this.food.onPositionChange(nextX, nextY, size);
+      this.food.onPositionChange(nextX, nextY);
 
       // 撞墙检测
-      const maxPos = PublicMap.mapSize - size;
+      const maxPos = PublicMap.mapSize - SNAKE_SIZE;
       if (nextX <= 0 || nextY <= 0 || nextX >= maxPos || nextY >= maxPos) {
         const action = container.get<ActionInterface>('action');
         action.stop();
@@ -124,11 +122,11 @@ export default class Snake extends Observer {
    */
   public render() {
     const { x, y } = this.getStates();
-    const { size: hsize, x: hx, y: hy } = this.getHistory();
+    const { x: hx, y: hy } = this.getHistory();
     const { mapX, mapY } = this;
 
     this.snakeBody.clear();
-    this.snakeHead.clearRect(hx - mapX, hy - mapY, hsize);
+    this.snakeHead.clearRect(hx - mapX, hy - mapY);
 
     this.snakeBody.render(mapX, mapY);
     this.snakeHead.render(x - mapX, y - mapY);

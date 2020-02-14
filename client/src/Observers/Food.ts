@@ -5,6 +5,7 @@ import Material from "../Components/Material";
 import PublicMap from './PublicMap';
 import FoodMoveWorker from '../Workers/FoodMove.worker';
 import { makeRandom, makeCanvas } from '../compatibles';
+import { SNAKE_SIZE } from '../constants';
 
 const foodColors: Array<string> = [
   '#F08080',
@@ -17,6 +18,7 @@ const foodColors: Array<string> = [
 ];
 
 const TREE_SIZE = 100;
+const halfSize = SNAKE_SIZE / 2;
 
 export default class Food extends Observer {
 
@@ -68,8 +70,8 @@ export default class Food extends Observer {
     for (const key in this.animates) {
       const [ x, y, color ] = this.animates[key];
       this.graphical.clearRect(x - 10, y - 10, 16, 16);
-      const dy = sny - y;
-      const dx = snx - x;
+      const dy = sny + halfSize - y;
+      const dx = snx + halfSize - x;
       const nextX = Math.abs(dx / dy) * (dx < 0 ? -1 : 1) + x;
       const nextY = (dy < 0 ? -1 : 1) + y;
       this.animates[key] = [nextX, nextY, color];
@@ -92,7 +94,7 @@ export default class Food extends Observer {
     this.context.drawImage(this.mapCanvas, x, y, width, height, 0, 0, width, height);
   }
 
-  public onPositionChange(x: number, y: number, size: number): void {
+  public onPositionChange(x: number, y: number): void {
     const DIST = 10;
     const num = PublicMap.mapSize / TREE_SIZE - 1;
     const key = Math.floor(x / TREE_SIZE) * TREE_SIZE;
@@ -100,14 +102,14 @@ export default class Food extends Observer {
     if (x - key < DIST && key > 0) {
       keys.push(key - 1);
     }
-    if (key < num && (x + size + 10) > key + 1) {
+    if (key < num && (x + SNAKE_SIZE + 10) > key + 1) {
       keys.push(key + 1);
     }
     for (const key of keys) {
       const _f = this.foods[key];
       for (const fkey in _f) {
         const [ fx, fy ] = _f[fkey];
-        this.foodMoveWorker.postMessage([x, y, size, fx, fy, key, fkey]);
+        this.foodMoveWorker.postMessage([x, y, SNAKE_SIZE, fx, fy, key, fkey]);
       }
     }
     this.setStates({snx: x, sny: y});

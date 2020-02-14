@@ -1,7 +1,7 @@
 import container from "../dependents";
 import Material, { snakeTheme } from '../Components/Material';
 import { SnakeType } from "../Enums/MaterialEnum";
-import { RADIAN } from "../constants";
+import { RADIAN, SNAKE_SIZE } from "../constants";
 import { makeCanvas } from "../compatibles";
 
 export default class SnakeHead {
@@ -16,27 +16,25 @@ export default class SnakeHead {
 
   public constructor(
     private context: CanvasRenderingContext2D,
-    theme: SnakeType,
-    private size: number
+    theme: SnakeType
   ) {
     const material = container.get<Material>('Material');
     const [ primaryColor ] = snakeTheme[theme];
-    this.sourceCanvas = material.snakeHeadToCanvas(primaryColor, size);
+    this.sourceCanvas = material.snakeHeadToCanvas(primaryColor, SNAKE_SIZE);
     this.sourceContext = this.sourceCanvas.getContext('2d');
     this.sourceContext.globalAlpha = 1;
 
-    const halfSize = size / 2;
-    this.offscreenCanvas = makeCanvas(size, size, true);
+    const halfSize = SNAKE_SIZE / 2;
+    this.offscreenCanvas = makeCanvas(SNAKE_SIZE, SNAKE_SIZE, true);
     this.offscreenContext = this.offscreenCanvas.getContext('2d');
     this.offscreenContext.translate(halfSize, halfSize);
     this.offscreenContext.drawImage(this.sourceCanvas, -halfSize, -halfSize);
   }
 
   public rotate(angle: number): void {
-    const { size } = this;
-    const halfSize = size / 2;
+    const halfSize = SNAKE_SIZE / 2;
     const clearPos = -halfSize - 5;
-    const clearSize = size + 10;
+    const clearSize = SNAKE_SIZE + 10;
 
     this.offscreenContext.save();
     this.offscreenContext.clearRect(clearPos, clearPos, clearSize, clearSize);
@@ -45,8 +43,8 @@ export default class SnakeHead {
     this.offscreenContext.restore();
   }
 
-  public clearRect(x: number, y: number, size: number): void {
-    const clearSize = size + 10;
+  public clearRect(x: number, y: number): void {
+    const clearSize = SNAKE_SIZE + 10;
     this.context.clearRect(x - 5, y - 5, clearSize, clearSize);
   }
 
