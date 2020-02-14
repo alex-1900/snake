@@ -165,8 +165,8 @@ export default class Snake extends Observer {
   private handleScoreAdded(): void {
     const { scores } = this;
     let newScores = scores;
-    if (scores >= 5) {
-      newScores = scores - 4; // -5 + 1
+    if (scores >= 10) {
+      newScores = scores - 9; // -5 + 1
       this.snakeBody.add();
     } else {
       newScores += 1;
