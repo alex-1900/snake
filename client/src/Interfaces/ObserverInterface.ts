@@ -39,4 +39,10 @@ export default interface ObserverInterface
    * @param state 重绘的状态
    */
   repaint(state: boolean): void;
+
+  /**
+   * 观察者可以将有用的数据同步到其他玩家的客户端
+   * 在这里返回相应的数据给请求组件
+   */
+  getRemoteData?(): any;
 }

@@ -19,8 +19,6 @@ export default class Snake extends Observer {
 
   private context: CanvasRenderingContext2D;
 
-  private waitTime: number = 18;
-
   private angleWorker: Worker = new AngleWorker();
 
   private snakeHead: SnakeHead;
@@ -44,8 +42,8 @@ export default class Snake extends Observer {
   private framerate: number = 32;
 
   public constructor(
-    private publicMap: PublicMap,
-    private food: Food
+    private food: Food,
+    private publicMap?: PublicMap
   ) {
     super();
     this.canvas = makeCanvas();

@@ -27,7 +27,7 @@ elementStartGame.onclick = function(event) {
   const publicMap = new PublicMap(food);
   subject.register(publicMap);
 
-  const snake = new Snake(publicMap, food);
+  const snake = new Snake(food, publicMap);
   subject.register(snake);
 
   const controller = new Control(elementRocker, elementSpeedUp, snake);
