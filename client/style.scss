@@ -29,6 +29,11 @@
     bottom: 0;
 }
 
+.justify-content-center {
+    display: flex;
+    justify-content: center;
+}
+
 /* 重合 */
 .coincide {
     position: absolute;
@@ -39,6 +44,13 @@
 body {
     width : 100vw;
     height : 100vh;
+
+    #map-theme {
+        width: 7em;
+        height: 2em;
+        border: 1px solid #888;
+        color: #555555;
+    }
 
     .text-center {
         text-align: center;
@@ -84,7 +96,7 @@ body {
             width: 70px;
             height: 70px;
             border-radius: 100%;
-            background: rgba(240, 107, 107, .7);
+            background: rgba(150, 230, 96, 0.7);
         }
     }
 
@@ -94,11 +106,7 @@ body {
             padding: 2rem;
         }
         button.start-game {
-            position: relative;
-            top: 0;
-            left: 50%;
-            margin-left: -50px;
-            margin-top: 3rem;
+            margin-top: 2rem;
             width: 100px;
             height: 40px;
             border: 1px dashed #888;

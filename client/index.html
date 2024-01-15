@@ -36,14 +36,20 @@
     </div>
     <div id="game-over" class="overflow-hidden landscape coincide select-none welcome" style="background:white;display:none;">
         <h1 class="text-center">游戏结束!</h1>
-        <div>
+        <div class="justify-content-center">
             <button id="game-over-confirm" class="start-game" type="button">确 认</button>
         </div>
     </div>
     <!-- 欢迎界面 -->
     <div id="welcome" class="overflow-hidden landscape coincide select-none welcome" style="background:white;">
         <h1 class="text-center">贪吃蛇大作战</h1>
-        <div>
+        <div class="justify-content-center">
+            <select name="map-theme" id="map-theme">
+                <option value="white">浅色主题</option>
+                <option value="black">深色主题</option>
+            </select>
+        </div>
+        <div class="justify-content-center">
             <button id="start-game" style="display: none;" class="start-game" type="button">开 始</button>
         </div>
         <div style="padding: 1rem;">
@@ -55,5 +61,14 @@
         </div>
     </div>
     <script src="./webpack.bundle.js"></script>
+    <script>
+      (function () {
+        var domMapTheme = document.getElementById('map-theme');
+        var domApp = document.getElementById('app');
+        domMapTheme.onchange = function (event) {
+          domApp.style.backgroundColor = event.target.value;
+        }
+      })();
+    </script>
 </body>
 </html>

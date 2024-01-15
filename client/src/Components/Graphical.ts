@@ -123,8 +123,24 @@ export default class Graphical {
     const { context } = this;
 
     context.beginPath();
+    context.lineWidth = 2;
+    context.strokeStyle = 'rgb(0,255,0)';
+    context.moveTo(0, 0);
+    context.lineTo(0, mapSize);
+    context.moveTo(mapSize, 0);
+    context.lineTo(mapSize, mapSize);
+
+    context.moveTo(0, 0);
+    context.lineTo(mapSize, 0);
+    context.moveTo(0, mapSize);
+    context.lineTo(mapSize, mapSize);
+    context.closePath();
+    context.stroke();
+
+    context.beginPath();
     context.lineWidth = .1;
-    context.fillStyle = '#aaa';
+    context.strokeStyle = '#313131';
+
     for (let i = 0; i < maxNum; i++) {
       // 竖直线
       if (i < xNum) {
@@ -133,7 +149,7 @@ export default class Graphical {
       }
       // 水平线
       if (i < yNum) {
-        context.moveTo(0, i * size);
+        context.moveTo(1, i * size);
         context.lineTo(mapSize, i * size);
       }
     }
