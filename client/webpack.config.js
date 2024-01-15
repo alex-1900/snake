@@ -16,28 +16,32 @@ module.exports = {
   },
   // devtool: 'inline-source-map',
   devServer: {
-    contentBase: DIST_PATH,
+    static: DIST_PATH,
     compress: true,
     port: 8000
   },
   module: {
     rules: [
-      {
-        test: /\.worker\.ts$/,
-        use: {
-          loader: 'worker-loader',
-          options: { inline: true }
-        }
-      },
+      // {
+      //   test: /\.worker\.ts$/,
+      //   use: {
+      //     loader: 'worker-loader',
+      //     options: { inline: true }
+      //   }
+      // },
       {test: /\.css$/, use: ['style-loader', 'css-loader']},
       {test: /\.(png|jpe?g|gif|svg|eot|ttf|woff|woff2|otf)$/, use: ['file-loader', 'url-loader']},
       {
-        test: /\.js$/,
+        test: /\.(?:js|mjs|cjs)$/,
+        exclude: /node_modules/,
         use: {
           loader: 'babel-loader',
-          // exclude: /(node_modules|bower_components)/,
           options: {
-            presets: ['@babel/preset-env']
+            exclude: [
+              /node_modules[\\/]core-js/,
+              /node_modules[\\/]webpack[\\/]buildin/,
+            ],
+            presets: ['@babel/preset-env', { targets: "defaults" }]
           }
         }
       },
@@ -59,7 +63,15 @@ module.exports = {
           // Translates CSS into CommonJS
           'css-loader',
           // Compiles Sass to CSS
-          'sass-loader',
+          {
+            loader: "sass-loader",
+            options: {
+              implementation: require("sass"),
+              sassOptions: {
+                fiber: false
+              },
+            },
+          },
         ],
       }
     ]
@@ -71,12 +83,14 @@ module.exports = {
     new webpack.ProvidePlugin({
       Promise: 'es6-promise-promise'
     }),
-    new CopyWebpackPlugin([
-      {from: './*.html'},
-      {from: './*.ico'},
-      {from: './static/*/*.png'},
-      {from: './github-buttons.js'},
-    ])
+    new CopyWebpackPlugin({
+        'patterns': [
+          {from: './*.html'},
+          {from: './*.ico'},
+          // {from: './static/*/*.png'},
+          {from: './github-buttons.js'},
+        ]
+    })
   ],
   watchOptions: {
     poll: 1000,
