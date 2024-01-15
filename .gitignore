@@ -1,2 +1,5 @@
 .env
 .DS_Store
+.idea/
+.vagrant/
+yarn-error.log

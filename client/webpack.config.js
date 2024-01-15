@@ -22,13 +22,13 @@ module.exports = {
   },
   module: {
     rules: [
-      // {
-      //   test: /\.worker\.ts$/,
-      //   use: {
-      //     loader: 'worker-loader',
-      //     options: { inline: true }
-      //   }
-      // },
+      {
+        test: /\.worker\.ts$/,
+        use: {
+          loader: 'worker-loader',
+          options: { inline: "no-fallback" }
+        }
+      },
       {test: /\.css$/, use: ['style-loader', 'css-loader']},
       {test: /\.(png|jpe?g|gif|svg|eot|ttf|woff|woff2|otf)$/, use: ['file-loader', 'url-loader']},
       {

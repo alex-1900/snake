@@ -5,7 +5,7 @@ import { END_ANGLE } from '../constants';
  */
 export default class Graphical {
 
-  private context: CanvasRenderingContext2D;
+  private readonly context: CanvasRenderingContext2D;
 
   /**
    * @param canvas 当前的 canvas 对象
@@ -143,10 +143,11 @@ export default class Graphical {
 
   /**
    * 渲染外圈
-   * 
+   *
    * @param x x 坐标
    * @param y y 坐标
    * @param r 半径
+   * @param color
    */
   private renderOuter(x: number, y: number, r: number, color: string): void {
     const { context } = this;

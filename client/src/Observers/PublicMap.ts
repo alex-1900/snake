@@ -3,22 +3,23 @@ import container from "../dependents";
 import Material from "../Components/Material";
 import Food from "./Food";
 import { makeCanvas } from "../compatibles";
+import {MAP_SIZE} from "../constants";
 
 export default class PublicMap extends Observer {
 
-  private canvas: HTMLCanvasElement;
+  private readonly canvas: HTMLCanvasElement;
 
   private context: CanvasRenderingContext2D;
 
-  private mapCanvas: HTMLCanvasElement;
+  private readonly mapCanvas: HTMLCanvasElement;
   
-  private interfaceSize: number[];
+  private readonly interfaceSize: number[];
 
   private x: number = 0;
 
   private y: number = 0;
 
-  static mapSize: number = 1200;
+  static mapSize: number = MAP_SIZE;
 
   public constructor(
     private food: Food

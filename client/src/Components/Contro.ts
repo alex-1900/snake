@@ -10,7 +10,7 @@ export default class Control {
   private startX: number = 0;
   private startY: number = 0;
 
-  private isHorizon: boolean;
+  private readonly isHorizon: boolean;
 
   private action: ActionInterface;
 
@@ -18,7 +18,7 @@ export default class Control {
 
   public constructor(
     private elementRocker: HTMLElement,
-    private elementSpeedUp: HTMLElement,
+    elementSpeedUp: HTMLElement,
     private snake: Snake
   ) {
     elementRocker.ontouchstart = this.rockerTouchStart.bind(this);

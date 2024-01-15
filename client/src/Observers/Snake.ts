@@ -15,9 +15,9 @@ import { makeRandom, makeCanvas } from '../compatibles';
  */
 export default class Snake extends Observer {
 
-  private canvas: HTMLCanvasElement;
+  private readonly canvas: HTMLCanvasElement;
 
-  private context: CanvasRenderingContext2D;
+  private readonly context: CanvasRenderingContext2D;
 
   private angleWorker: Worker = new AngleWorker();
 
@@ -25,9 +25,9 @@ export default class Snake extends Observer {
 
   private snakeBody: SnakeBody;
 
-  private interfaceWidth: number;
+  private readonly interfaceWidth: number;
 
-  private interfaceHeight: number;
+  private readonly interfaceHeight: number;
 
   private scores: number = 0;
 

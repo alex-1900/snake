@@ -9,11 +9,11 @@ import container from './dependents';
 export function getInterfaceSize(clientWidth: number, clientHeight: number) {
   const max = Math.max(clientWidth, clientHeight);
   const min = Math.min(clientWidth, clientHeight);
-  const estimateLongSide = max * 9 / 16;
-  if (estimateLongSide > min) {
-    return [min * 16 / 9, min]
-  }
-  return [max, estimateLongSide];
+  // const estimateLongSide = max * 9 / 16;
+  // if (estimateLongSide > min) {
+  //   return [min * 16 / 9, min]
+  // }
+  return [max, min];
 }
 
 /**

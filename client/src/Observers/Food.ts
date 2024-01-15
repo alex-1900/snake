@@ -22,15 +22,15 @@ const halfSize = SNAKE_SIZE / 2;
 
 export default class Food extends Observer {
 
-  private canvas: HTMLCanvasElement;
+  private readonly canvas: HTMLCanvasElement;
 
   private context: CanvasRenderingContext2D;
 
   private graphical: Graphical;
 
-  private mapCanvas: HTMLCanvasElement;
+  private readonly mapCanvas: HTMLCanvasElement;
 
-  private interfaceSize: number[];
+  private readonly interfaceSize: number[];
 
   private foodNumber: number = PublicMap.mapSize / 10;
 

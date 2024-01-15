@@ -6,11 +6,11 @@ import { makeCanvas } from "../compatibles";
 
 export default class SnakeHead {
 
-  private sourceCanvas: HTMLCanvasElement;
+  private readonly sourceCanvas: HTMLCanvasElement;
 
   private sourceContext: CanvasRenderingContext2D;
 
-  private offscreenCanvas: HTMLCanvasElement;
+  private readonly offscreenCanvas: HTMLCanvasElement;
 
   private offscreenContext: CanvasRenderingContext2D;
 

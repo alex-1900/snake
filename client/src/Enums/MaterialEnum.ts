@@ -6,4 +6,4 @@ export enum SnakeType {
   Red,
   Blue,
   Cyan
-};
+}

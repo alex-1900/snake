@@ -19,7 +19,7 @@ export default class Material {
    * @param withBackground 是否画背景线条
    */
   public getMap(size: number, withBackground: boolean = true): HTMLCanvasElement {
-    const canvas = makeCanvas(5000, 5000, true);
+    const canvas = makeCanvas(size, size, true);
     if (withBackground) {
       const graphical = container.make<Graphical>('Graphical', canvas);
       graphical.mapBackground(20, size);

@@ -13,12 +13,12 @@ const elementStartGame = document.getElementById('start-game');
 const elementWelcome = document.getElementById('welcome');
 
 const elementGameOverCfm = document.getElementById('game-over-confirm');
-const elementGameover = document.getElementById('gameover');
+const elementGameOver = document.getElementById('game-over');
 
 const action = container.get<ActionInterface>('action');
 const subject = container.get<SubjectInterface>('subject');
 
-elementStartGame.onclick = function(event) {
+elementStartGame.onclick = function() {
   elementWelcome.style.display = 'none';
 
   const food = new Food();
@@ -34,14 +34,14 @@ elementStartGame.onclick = function(event) {
 
   action.onStop(function() {
     controller.terminate();  // 结束控制器的 Worker
-    elementGameover.style.display = 'block';
+    elementGameOver.style.display = 'block';
   });
 
   action.start();
 };
 
-elementGameOverCfm.onclick = function(event) {
-  elementGameover.style.display = 'none';
+elementGameOverCfm.onclick = function() {
+  elementGameOver.style.display = 'none';
   elementWelcome.style.display = 'block';
 };
 
